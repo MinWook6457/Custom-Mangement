@@ -21,24 +21,25 @@ const styles = theme => ({
   }
 })
 
-const customers =  [
-  {
-  'id' : 1,
-  'name' : '김민욱',
-  'birthday' : '000406',
-  'gender' : '남자',
-  'job' : '대학생',
-  },
-  {
-    'id' : 2,
-    'name' : '백진겸',
-    'birthday' : '001010', 
-    'gender' : '남자',
-    'job' : '백수',
-  }
-]
 
 class App extends Component{
+
+  state = { // 컴포넌트 내에서 변경될 수 있음을 명시
+    costomers: ""
+  }
+
+  componentDidMount() { // 모든 컴포넌트가 마운트 완료 시 실행
+    this.callAPI()
+      .then(res => this.setState({customers:res}))
+      .catch(err => console.log(err))
+  }
+
+  callAPI = async () => {
+    const response = await fetch('/api/customers')
+    const body = await response.json()
+    return body
+  }
+
   render(){
    
     return(
@@ -55,7 +56,10 @@ class App extends Component{
             </TableRow>
           </TableHead>
           <TableBody>
-          {customers.map(c => { return ( <Customer key = {c.id} id={c.id} name = {c.name} birthday = {c.birthday} gender = {c.gender} job = {c.job} />) }) }
+          { //  this.state.customers 가 존재해야만 실행
+          this.state.customers ? this.state.customers.map(c => {
+             return ( <Customer key = {c.id} id={c.id} name = {c.name} birthday = {c.birthday} gender = {c.gender} job = {c.job} />) }) 
+             : ""}
           </TableBody>
         </Table>
       </Paper>
