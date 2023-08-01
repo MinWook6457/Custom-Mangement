@@ -9,6 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import { withStyles } from '@mui/material/styles';
 import { ClassNames } from '@emotion/react';
+import { CircularProgress } from '@mui/material';
 
 const styles = theme => ({
   root : {
@@ -18,6 +19,9 @@ const styles = theme => ({
   },
   table : {
     minWidth : 1000
+  },
+  progress : {
+    margin : theme.spacing.unit * 2
   }
 })
 
@@ -25,19 +29,28 @@ const styles = theme => ({
 class App extends Component{
 
   state = { // 컴포넌트 내에서 변경될 수 있음을 명시
-    costomers: ""
+    costomers: "",
+    completed : 0
   }
 
   componentDidMount() { // 모든 컴포넌트가 마운트 완료 시 실행
+    this.timer = setInterval(this.progress, 20); // 0.02초 마다 progress 함수 실행 
+    
     this.callAPI()
       .then(res => this.setState({customers:res}))
       .catch(err => console.log(err))
-  }
+    
+   }
 
   callAPI = async () => {
     const response = await fetch('/api/customers')
     const body = await response.json()
     return body
+  }
+
+  progress = () => {
+    const {completed} = this.state
+    this.setState({ completed : completed >= 100 ? 0 : completed + 1})
   }
 
   render(){
@@ -59,7 +72,13 @@ class App extends Component{
           { //  this.state.customers 가 존재해야만 실행
           this.state.customers ? this.state.customers.map(c => {
              return ( <Customer key = {c.id} id={c.id} name = {c.name} birthday = {c.birthday} gender = {c.gender} job = {c.job} />) }) 
-             : ""}
+             : 
+             <TableRow>
+              <TableCell colSpan="6" align="center">
+                <CircularProgress className={ClassNames.progress} variant="indeterminate" value={this.state.completed}/>
+              </TableCell>
+             </TableRow>
+             }
           </TableBody>
         </Table>
       </Paper>
